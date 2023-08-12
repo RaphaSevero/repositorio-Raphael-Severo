@@ -1,0 +1,70 @@
+class CaixaDaLanchonete {
+  constructor() {
+    this.cardapio = [
+      { codigo: 'cafe', descricao: 'Café', valor: 3.0 },
+      { codigo: 'chantily', descricao: 'Chantily (extra do Café)', valor: 1.5 },
+      { codigo: 'suco', descricao: 'Suco Natural', valor: 6.2 },
+      { codigo: 'sanduiche', descricao: 'Sanduíche', valor: 6.5 },
+      { codigo: 'queijo', descricao: 'Queijo (extra do Sanduíche)', valor: 2.0 },
+      { codigo: 'salgado', descricao: 'Salgado', valor: 7.25 },
+      { codigo: 'combo1', descricao: '1 Suco e 1 Sanduíche', valor: 9.5 },
+      { codigo: 'combo2', descricao: '1 Café e 1 Sanduíche', valor: 7.5 },
+    ];
+    this.formasDePagamento = ['debito', 'credito', 'dinheiro'];
+  }
+
+  calcularValorDaCompra(formaDePagamento, itens) {
+    // Verificar se a forma de pagamento é válida
+    if (!this.formasDePagamento.includes(formaDePagamento)) {
+      return 'Forma de pagamento inválida!';
+    }
+
+    // Inicializar o valor total da compra
+    let valorTotal = 0;
+
+    // Percorrer cada item da lista de itens
+    for (const item of itens) {
+      const [codigo, quantidade] = item.split(',');
+      const menuItem = this.cardapio.find((menuItem) => menuItem.codigo === codigo);
+
+      // Verificar se o código do item é válido
+      if (!menuItem) {
+        return 'Item inválido!';
+      }
+
+      // Verificar se o item é um combo
+      if (menuItem.codigo.startsWith('combo')) {
+        // Adicionar o valor do combo à compra
+        valorTotal += menuItem.valor;
+      } else {
+        // Verificar se há item principal para o item extra
+        if (menuItem.descricao.includes('extra')) {
+          const principalCodigo = menuItem.codigo.split('-')[0];
+          const principalItem = this.cardapio.find((item) => item.codigo === principalCodigo);
+          if (!itens.includes(`${principalCodigo},${quantidade}`)) {
+            return 'Item extra não pode ser pedido sem o principal';
+          }
+        }
+
+        // Adicionar o valor do item à compra
+        valorTotal += menuItem.valor * quantidade;
+      }
+    }
+
+    // Aplicar desconto ou acréscimo conforme forma de pagamento
+    if (formaDePagamento === 'dinheiro') {
+      valorTotal *= 0.95; // Desconto de 5% para pagamento em dinheiro
+    } else if (formaDePagamento === 'credito') {
+      valorTotal *= 1.03; // Acréscimo de 3% para pagamento a crédito
+    }
+
+    // Formatar o valor total da compra
+    const valorFormatado = valorTotal.toFixed(2).replace('.', ',');
+
+    return `R$ ${valorFormatado}`;
+  }
+}
+
+// Exemplo de uso:
+const resultado = new CaixaDaLanchonete().calcularValorDaCompra('debito', ['cafe,1', 'chantily,1']);
+console.log(resultado); // Deve imprimir "R$ 4,50"
